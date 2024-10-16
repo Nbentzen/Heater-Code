@@ -1,5 +1,6 @@
 #include "max31855.h"
 #include <math.h>
+#include <SPI.h>
 
 #define MAX31855_FAULT_OPEN       0x01
 #define MAX31855_FAULT_SHORT_GND  0x02
@@ -34,7 +35,7 @@ void Max31855::chip_enabled(bool en)
 Max31855_ret_t Max31855::get_temp()
 {
   Max31855_ret_t result = {NAN, MAX_ERROR_NONE};
-  data = read();
+  uint32_t data = read();
   if (data & MAX31855_FAULT_OPEN) {result.error = MAX_ERROR_OPEN_CIRCUIT;}
   if (data & MAX31855_FAULT_SHORT_GND) {result.error = MAX_ERROR_SHORT_GROUND;}
   if (data & MAX31855_FAULT_SHORT_VCC) {result.error = MAX_ERROR_SHORT_VCC;}
@@ -43,9 +44,9 @@ Max31855_ret_t Max31855::get_temp()
 
   result.int_celcius = (float)((data >> 4) & 0x7FF);
   result.int_celcius *= 0.0625;
-  if ((data >> 4) & 0x800){result.internal *= -1.0;}
+  if ((data >> 4) & 0x800){result.int_celcius *= -1.0;}
 
-  if(data & 0x80000000
+  if(data & 0x80000000)
   {
     data = 0xFFFFC000 | ((data >> 18) & 0x00003FFF);
   }

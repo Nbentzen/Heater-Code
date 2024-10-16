@@ -1,14 +1,20 @@
 #ifndef HEATER_ZONE_GLA
 #define HEATER_ZONE_GLA
 #include "max31855.h"
+#include "PID.h"
 
 class HeaterZone {
 public:
-    HeaterZone() : zoneName(nullptr), cs_pin(0), out_pin(0), kp(0.0f), ki(0.0f), kd(0.0f), temperature(0.0f), isOn(false), thermocouple(0) {}
+    HeaterZone() : zoneName(nullptr), cs_pin(0), out_pin(0), kp(0.0f), ki(0.0f), kd(0.0f), set_point(0.0f), isOn(false), thermocouple(0)
+    {
+        pid.setKp(kp);
+        pid.setKi(ki);
+        pid.setKd(kd);
+    }
 
     void initialize(const char* name, int cs, int out, float proportional, float integral, float derivative);
-    void setTemperature(float temp);
-    float getTemperature() const;
+    void setSetPoint(float temp);
+    float getSetPoint() const;
     void setKi(float integral);
     float getKi() const;
     void setKp(float proportional);
@@ -23,6 +29,10 @@ public:
     int getCsPin() const;
     int getOutPin() const;
 
+    void refresh();
+
+    Max31855_ret_t getTemperature() const;
+
 private:
     const char* zoneName;
     int cs_pin;
@@ -30,10 +40,14 @@ private:
     float kp;
     float ki;
     float kd;
-    float temperature;
+    float set_point;
     bool isOn;
+    void getThermocoupleState();
 
     Max31855 thermocouple;
+    Max31855_ret_t thermocouple_state;
+
+    PID pid;
 };
 
 #endif //HEATER_ZONE_GLA

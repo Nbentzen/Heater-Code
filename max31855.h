@@ -15,7 +15,7 @@ typedef struct
 {
   float ext_celcius;
   float int_celcius;
-  max38155_error error;
+  Max38155_error error;
 } Max31855_ret_t;
 
 class Max31855
@@ -27,6 +27,6 @@ private:
   uint32_t read();
   void chip_enabled(bool en);
   int cs;
-}
+};
 
 #endif //MAX31855_GLA

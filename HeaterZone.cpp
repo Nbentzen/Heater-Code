@@ -12,32 +12,32 @@ void HeaterZone::initialize(const char* name, int cs, int out,
     thermocouple = Max31855(cs_pin);
 }
 
-void HeaterZone::setTemperature(float temp) {
-    temperature = temp;
+void HeaterZone::setSetPoint(float temp) {
+    set_point = temp;
 }
 
-float HeaterZone::getTemperature() const {
-    return temperature;
-}
-
-void HeaterZone::setKi(float integral) {
-    ki = integral;
+float HeaterZone::getSetPoint() const {
+    return set_point;
 }
 
 void HeaterZone::setKp(float proportional) {
   kp = proportional;
 }
 
+void HeaterZone::setKi(float integral) {
+    ki = integral;
+}
+
 void HeaterZone::setKd(float derivative) {
   kd = derivative;
 }
 
-float HeaterZone::getKi() const {
-    return ki;
-}
-
 float HeaterZone::getKp() const {
     return kp;
+}
+
+float HeaterZone::getKi() const {
+    return ki;
 }
 
 float HeaterZone::getKd() const {
@@ -66,4 +66,13 @@ int HeaterZone::getCsPin() const {
 
 int HeaterZone::getOutPin() const {
     return out_pin;
+}
+
+Max31855_ret_t HeaterZone::getTemperature() const {
+    return thermocouple_state;
+}
+
+void HeaterZone::refresh()
+{
+    thermocouple_state = thermocouple.get_temp();
 }
