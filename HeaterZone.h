@@ -3,14 +3,19 @@
 #include "max31855.h"
 #include "PID.h"
 
+#define HYSTERISIS .5
+
+typedef struct {
+  Max31855_ret_t TcState;
+  float dutyCycle;
+  float setPoint;
+  bool isOn;
+} HeaterZoneRet_t;
+
 class HeaterZone {
 public:
-    HeaterZone() : zoneName(nullptr), cs_pin(0), out_pin(0), kp(0.0f), ki(0.0f), kd(0.0f), set_point(0.0f), isOn(false), thermocouple(0)
-    {
-        pid.setKp(kp);
-        pid.setKi(ki);
-        pid.setKd(kd);
-    }
+    HeaterZone::HeaterZone()
+    : zoneName(nullptr), cs_pin(-1), out_pin(-1), set_point(0), isOn(false), pid(0, 0, 0) {}
 
     void initialize(const char* name, int cs, int out, float proportional, float integral, float derivative);
     void setSetPoint(float temp);
@@ -29,7 +34,7 @@ public:
     int getCsPin() const;
     int getOutPin() const;
 
-    void refresh();
+    HeaterZoneRet_t update();
 
     Max31855_ret_t getTemperature() const;
 
@@ -37,12 +42,11 @@ private:
     const char* zoneName;
     int cs_pin;
     int out_pin;
-    float kp;
-    float ki;
-    float kd;
     float set_point;
     bool isOn;
     void getThermocoupleState();
+
+    bool powerOn;
 
     Max31855 thermocouple;
     Max31855_ret_t thermocouple_state;

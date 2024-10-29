@@ -1,7 +1,14 @@
 #include "PID.h"
 #include "Arduino.h"
 
+PID::PID() {}
 
+PID::PID(float kp, float ki, float kd)
+{
+  kp = kp;
+  ki = ki;
+  kd = kd;
+}
 void PID::setKp(float kp){kp = kp;}
 void PID::setKi(float _ki)
 {
@@ -40,3 +47,7 @@ float PID::compute(float temperature)
 
   return result;
 }
+
+float PID::getKp(){return kp;}
+float PID::getKi(){return ki;}
+float PID::getKd(){return kd;}
