@@ -9,6 +9,7 @@ typedef enum
   MAX_ERROR_OPEN_CIRCUIT,
   MAX_ERROR_SHORT_GROUND,
   MAX_ERROR_SHORT_VCC,
+  MAX_ERROR_MISSING,
 } Max38155_error;
 
 typedef struct

@@ -2,14 +2,24 @@
 #define HEATER_ZONE_GLA
 #include "max31855.h"
 #include "PID.h"
+#include "ThermalRunaway.h"
+
+#define RAMP_RATE .25
 
 #define HYSTERISIS .5
+
+typedef enum {
+  HEATER_ERROR_NONE,
+  HEATER_ERROR_RUNAWAY,
+} HeaterZone_error;
 
 typedef struct {
   Max31855_ret_t TcState;
   float dutyCycle;
   float setPoint;
+  float realSetPoint;
   bool isOn;
+  HeaterZone_error error;
 } HeaterZoneRet_t;
 
 class HeaterZone {
@@ -43,13 +53,18 @@ private:
     int cs_pin;
     int out_pin;
     float set_point;
+    float real_set_point;
     bool isOn;
     void getThermocoupleState();
 
     bool powerOn;
 
+    uint32_t prev_update_time;
+
     Max31855 thermocouple;
     Max31855_ret_t thermocouple_state;
+
+    ThermalRunaway thermalRunaway;
 
     PID pid;
 };

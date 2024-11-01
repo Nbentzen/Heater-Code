@@ -14,21 +14,19 @@ void setup() {
   digitalWrite(SS, HIGH);
   digitalWrite(SCK, HIGH);
 
-  pinMode(A0, INPUT);
-
-  // while(1)
-  // {
-  //   digitalWrite(pinAssignment.HeaterList.CapillaryHeater.CsPin, HIGH);
-  //   digitalWrite(SCK, HIGH);
-  //   delay(5);
-  //   digitalWrite(pinAssignment.HeaterList.CapillaryHeater.CsPin, LOW);
-  //   digitalWrite(SCK, LOW);
-  //   delay(5);
-  // }
+  pinMode(LED_BUILTIN, OUTPUT);
 
   Serial.begin(9600);
-  while(!Serial){delay(1);}
+  while(!Serial)
+  {
+    delay(50);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(50);
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
   Serial.println("---reset---");
+
+  delay(50);
   heaterController.addZone("mass_spec", pinAssignment.HeaterList.MassSpecHeater.CsPin, pinAssignment.HeaterList.MassSpecHeater.OutPin, 0, 0, 0);
   heaterController.addZone("analyte",   pinAssignment.HeaterList.AnalyteHeater.CsPin, pinAssignment.HeaterList.AnalyteHeater.OutPin, 0, 0, 0);
   heaterController.addZone("sampler",   pinAssignment.HeaterList.SamplerHeater.CsPin, pinAssignment.HeaterList.SamplerHeater.OutPin, 0, 0, 0);
@@ -43,17 +41,17 @@ void setup() {
   pinMode(pinAssignment.HeaterList.SamplerHeater.OutPin,    OUTPUT);
   pinMode(pinAssignment.HeaterList.CapillaryHeater.OutPin,  OUTPUT);
 
+  //digitalWrite(pinAssignment.HeaterList.SamplerHeater.OutPin,     HIGH); //left
+  // digitalWrite(pinAssignment.HeaterList.MassSpecHeater.OutPin,    HIGH); //1
+  // digitalWrite(pinAssignment.HeaterList.AnalyteHeater.OutPin,     HIGH);  //2
+  // digitalWrite(pinAssignment.HeaterList.CapillaryHeater.OutPin,   HIGH); // right
+
+  delay(5000);
+
   digitalWrite(pinAssignment.HeaterList.SamplerHeater.OutPin,     LOW);
   digitalWrite(pinAssignment.HeaterList.MassSpecHeater.OutPin,    LOW);
   digitalWrite(pinAssignment.HeaterList.AnalyteHeater.OutPin,     LOW);
   digitalWrite(pinAssignment.HeaterList.CapillaryHeater.OutPin,   LOW);
-
-  digitalWrite(pinAssignment.HeaterList.SamplerHeater.OutPin,     HIGH);
-  digitalWrite(pinAssignment.HeaterList.MassSpecHeater.OutPin,    HIGH);
-  digitalWrite(pinAssignment.HeaterList.AnalyteHeater.OutPin,     HIGH);
-  digitalWrite(pinAssignment.HeaterList.CapillaryHeater.OutPin,   HIGH);
-
-  delay(500);
 
   digitalWrite(pinAssignment.HeaterList.MassSpecHeater.CsPin,   HIGH);
   digitalWrite(pinAssignment.HeaterList.AnalyteHeater.CsPin,    HIGH);
@@ -72,7 +70,7 @@ void loop() {
     Serial.println("------");
     while(1)
     {
-      //digitalWrite(pinAssignment.HeaterList.SamplerHeater.OutPin,     HIGH);
+      digitalWrite(LED_BUILTIN,     HIGH);
       HeaterCtrl_ret_t result = heaterController.update();
       Serial.print(result.zoneName); Serial.print(" "); Serial.print(result.zoneState.TcState.ext_celcius);
       Serial.print(" / ");Serial.print(result.zoneState.setPoint);Serial.print(" / ");
@@ -93,7 +91,7 @@ void loop() {
       }
       if(result.remainingZones == 0){break;}
     }
-    //digitalWrite(pinAssignment.HeaterList.SamplerHeater.OutPin,     LOW);
+    digitalWrite(LED_BUILTIN,     LOW);
     Serial.println("------");
   }
   while(Serial.available())

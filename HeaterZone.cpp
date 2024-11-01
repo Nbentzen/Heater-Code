@@ -82,7 +82,18 @@ Max31855_ret_t HeaterZone::getTemperature() const {
 
 HeaterZoneRet_t HeaterZone::update()
 {
-
+    float dT = (millis() - prev_update_time)/1000.0;
+    prev_update_time = millis();
+    
+    if(real_set_point < set_point)
+    {
+      if(real_set_point < 25.0){real_set_point = 30.1;}
+      real_set_point += dT*RAMP_RATE;
+    }
+    if(real_set_point > set_point)
+    {
+      real_set_point = set_point;
+    }
     HeaterZoneRet_t result;
     thermocouple_state = thermocouple.get_temp();
     float duty_cycle = NAN;
@@ -92,32 +103,34 @@ HeaterZoneRet_t HeaterZone::update()
     }
     result.TcState = thermocouple_state;
     result.dutyCycle = duty_cycle;
-    result.setPoint = set_point;
+    result.setPoint = real_set_point;
     result.isOn = isOn;
 
-    if(isOn)
+    if(!isOn){real_set_point = 0.0;}
+
+    if(isOn && result.TcState.error == MAX_ERROR_NONE)
     {
       if(powerOn)
       {
-        if(thermocouple_state.ext_celcius > HYSTERISIS / 2 + set_point)
+        if(thermocouple_state.ext_celcius > HYSTERISIS / 2 + real_set_point)
         {
           powerOn = false;
         }
       }
       else
       {
-        if(thermocouple_state.ext_celcius < set_point - HYSTERISIS / 2)
+        if(thermocouple_state.ext_celcius < real_set_point - HYSTERISIS / 2)
         {
           powerOn = true;
         }
       }
+      //thermalRunaway.update(thermocouple_state.ext_celcius, set_point, powerOn);
       digitalWrite(out_pin, powerOn ? HIGH : LOW);
     }
-
-    
-
-    if(!isOn){digitalWrite(out_pin, LOW);}
-    if(thermocouple_state.error){digitalWrite(out_pin, LOW);}
+    else
+    {
+      digitalWrite(out_pin, LOW);
+    }
 
     return result;
 }

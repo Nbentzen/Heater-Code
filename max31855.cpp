@@ -106,6 +106,11 @@ Max31855_ret_t Max31855::get_temp_6675()
 
   result.ext_celcius = data * 0.25;
 
+  if(data == 0)
+  {
+    result.error = MAX_ERROR_MISSING;
+  }
+
   return result;
 
 }

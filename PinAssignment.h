@@ -26,14 +26,14 @@ public:
 		TBD_1 = 36U,
 		TBD_2 = 37U,
 		BUTT_1 = 2U,
-    CAPILLARY_CS = 45U,
-    CAPILLARY_HEAT = 44U,
-    ANALYTE_CS = 43U,
-    ANALYTE_HEAT = 42U,
-    MASS_SPEC_CS = 41U,
-    MASS_SPEC_HEAT = 35U,
-    SAMPLER_CS = 39U,
-    SAMPLER_HEAT = 38U,
+    CAPILLARY_CS = 36,
+    CAPILLARY_HEAT = 37,
+    ANALYTE_CS = 34,
+    ANALYTE_HEAT = 35,
+    MASS_SPEC_CS = 32,
+    MASS_SPEC_HEAT = 33,
+    SAMPLER_CS = 30,
+    SAMPLER_HEAT = 31,
 	};
 
 	struct ChannelData
