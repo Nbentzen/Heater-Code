@@ -7,7 +7,7 @@
 #define MAX31855_FAULT_SHORT_VCC  0x03
 #define MAX31855_FAULT_UNION      0x07
 
-#define DELAY 1000
+#define DELAY 2000
 
 Max31855::Max31855()
 {
@@ -102,14 +102,16 @@ Max31855_ret_t Max31855::get_temp_6675()
   result.raw = data;
   if(data & 0x04){result.error = 1;}
 
-  data >>= 3;
 
-  result.ext_celcius = data * 0.25;
 
-  if(data == 0)
+  if(data == 0 || data == 0xFFFF)
   {
     result.error = MAX_ERROR_MISSING;
   }
+
+  data >>= 3;
+
+  result.ext_celcius = data * 0.25;
 
   return result;
 

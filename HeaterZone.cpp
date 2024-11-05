@@ -2,12 +2,18 @@
 #include <Math.h>
 
 void HeaterZone::initialize(const char* name, int cs, int out,
-                      float proportional, float integral, float derivative) {
+                      float proportional, float integral, float derivative,
+                      int analogPin, float _rampRate, int _minTemp, int _maxTemp) {
     zoneName = name;
     cs_pin = cs;
     out_pin = out;
     pid = PID(proportional, integral, derivative);
     thermocouple.set_cs(cs);
+    if(analogPin > 0) { pinMode(analogPin, INPUT); }
+    analog_pin = analogPin;
+    minTemp = _minTemp;
+    maxTemp = _maxTemp;
+    rampRate = _rampRate;
 }
 
 void HeaterZone::setSetPoint(float temp) {
@@ -84,6 +90,29 @@ HeaterZoneRet_t HeaterZone::update()
 {
     float dT = (millis() - prev_update_time)/1000.0;
     prev_update_time = millis();
+    HeaterZoneRet_t result;
+
+    if(analog_pin > 0)
+    { 
+      result.analogPinRead = analogRead(analog_pin);
+      float analogSetPoint = (float)result.analogPinRead/1024.0;
+
+      if(analogSetPoint > 1.0){analogSetPoint = 1.0;}
+      if(analogSetPoint < 0.0){analogSetPoint = 0.0;}
+
+      analogSetPoint = 1.0 - analogSetPoint;
+
+      if(analogSetPoint > 0.05)
+      { 
+        turnOn(); 
+      }
+      else
+      {
+        turnOff();
+      }
+      set_point = (maxTemp - minTemp)*analogSetPoint + minTemp;
+
+    }
     
     if(real_set_point < set_point)
     {
@@ -94,7 +123,7 @@ HeaterZoneRet_t HeaterZone::update()
     {
       real_set_point = set_point;
     }
-    HeaterZoneRet_t result;
+
     thermocouple_state = thermocouple.get_temp();
     float duty_cycle = NAN;
     if(thermocouple_state.error == MAX_ERROR_NONE)
@@ -106,7 +135,7 @@ HeaterZoneRet_t HeaterZone::update()
     result.setPoint = real_set_point;
     result.isOn = isOn;
 
-    if(!isOn){real_set_point = 0.0;}
+    if(!isOn){real_set_point = 0.0; powerOn = false;}
 
     if(isOn && result.TcState.error == MAX_ERROR_NONE)
     {
@@ -130,7 +159,19 @@ HeaterZoneRet_t HeaterZone::update()
     else
     {
       digitalWrite(out_pin, LOW);
+      powerOn = false;
     }
 
+    result.isPowered = powerOn;
+    result.setPoint = set_point;
+    result.realSetPoint = real_set_point;
+
+    state = result;
+
     return result;
+}
+
+HeaterZoneRet_t HeaterZone::get_state()
+{
+  return state;
 }

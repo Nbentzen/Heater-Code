@@ -1,11 +1,12 @@
 #include "HeaterController.h"
 
 
-bool HeaterController::addZone(const char* name, int cs, int out, float kp, float ki, float kd) {
+bool HeaterController::addZone(const char* name, int cs, int out, float kp, float ki, float kd, int analogPin, float rampRate, int minTemp, int maxTemp) {
     if (zoneCount < MAX_ZONES) {
-        zones[zoneCount].initialize(name, cs, out, kp, ki, kd);
+        zones[zoneCount].initialize(name, cs, out, kp, ki, kd, analogPin, rampRate, minTemp, maxTemp);
 
         ++zoneCount;
+        set_name_len(strlen(name));
         return true;
     }
     return false; // Maximum zones reached
@@ -272,19 +273,33 @@ void HeaterController::finishUpdate()
 HeaterCtrl_ret_t HeaterController::update()
 {
   HeaterCtrl_ret_t result;
-  startUpdate();
-  if(zonesToUpdate > 0)
+  // startUpdate();
+  // if(zonesToUpdate > 0)
+  // {
+  //   result.zoneState = zones[zoneCount - zonesToUpdate].update();
+  //   result.zoneName = zones[zoneCount - zonesToUpdate].getZoneName();
+  //   result.heaterCtrl_error = HEATER_CTRL_SUCCESS;
+  //   zonesToUpdate--;
+  //   result.remainingZones = zonesToUpdate;
+  // }
+  // if(zonesToUpdate == 0)
+  // {
+  //   finishUpdate();
+  // }
+  for(int i = 0; i < zoneCount; i++)
   {
-    result.zoneState = zones[zoneCount - zonesToUpdate].update();
-    result.zoneName = zones[zoneCount - zonesToUpdate].getZoneName();
-    result.heaterCtrl_error = HEATER_CTRL_SUCCESS;
-    zonesToUpdate--;
-    result.remainingZones = zonesToUpdate;
-  }
-  if(zonesToUpdate == 0)
-  {
-    finishUpdate();
+    zones[i].update();
   }
   return result;
 }
 
+void HeaterController::updateDisplay()
+{
+  for(int i = 0; i < zoneCount; i++)
+  {
+    HeaterZoneRet_t zoneState = zones[i].get_state();
+    update_lcd(zones[i].getZoneName(), i, zoneState.TcState.ext_celcius, zoneState.setPoint, zoneState.realSetPoint, zoneState.isOn, zoneState.isPowered, zoneState.TcState.error);
+    //Serial.println(zoneState.TcState.error);
+  }
+}
+//void update_lcd(const char* name, int line_no float temp, float set_temp, bool powered, int error)

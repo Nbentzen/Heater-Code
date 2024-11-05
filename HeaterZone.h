@@ -19,15 +19,18 @@ typedef struct {
   float setPoint;
   float realSetPoint;
   bool isOn;
+  bool isPowered;
   HeaterZone_error error;
+  float analogPinRead;
 } HeaterZoneRet_t;
 
 class HeaterZone {
 public:
     HeaterZone::HeaterZone()
-    : zoneName(nullptr), cs_pin(-1), out_pin(-1), set_point(0), isOn(false), pid(0, 0, 0) {}
+    : zoneName(nullptr), cs_pin(-1), out_pin(-1), set_point(0), isOn(false), pid(0, 0, 0), analog_pin(-1), rampRate(0.0), minTemp(25), maxTemp(250) {}
 
-    void initialize(const char* name, int cs, int out, float proportional, float integral, float derivative);
+    void initialize(const char* name, int cs, int out, float proportional, float integral, float derivative, int analogPin, float rampRate,
+              int minTemp, int maxTemp);
     void setSetPoint(float temp);
     float getSetPoint() const;
     void setKi(float integral);
@@ -48,6 +51,8 @@ public:
 
     Max31855_ret_t getTemperature() const;
 
+    HeaterZoneRet_t get_state();
+
 private:
     const char* zoneName;
     int cs_pin;
@@ -57,7 +62,13 @@ private:
     bool isOn;
     void getThermocoupleState();
 
+    HeaterZoneRet_t state;
+
+    int analog_pin;
+
     bool powerOn;
+
+    float rampRate;
 
     uint32_t prev_update_time;
 
@@ -65,6 +76,9 @@ private:
     Max31855_ret_t thermocouple_state;
 
     ThermalRunaway thermalRunaway;
+
+    int minTemp;
+    int maxTemp;
 
     PID pid;
 };
